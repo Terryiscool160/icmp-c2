@@ -6,7 +6,7 @@
 
 ###
 
-this program is designed to be a working example of using icmp to communicate between a client and a server to get past (most) firewalls and detection solutions, i decided to try this out after reading on how icmp is often overlooked by security solutions
+this program is designed to be a working example of using ICMP to communicate between a client and a server to get past (most) firewalls and detection solutions, i decided to try this out after reading on how icmp is often overlooked by security solutions
 
 **WARNING**: i am not responsible for how you use this tool, the responses and commands are fully unencrypted (for now) and can easily be noticed by blue teams monitoring actual packet content
 
@@ -15,6 +15,6 @@ this program is designed to be a working example of using icmp to communicate be
 ## Running Locally
 
 1. you can install rust by following the [official guide](https://www.rust-lang.org/tools/install)
-3. execute `cargo build --release`
-4. you will find the `client` and `server` binaries in the `target/release` directory
-5) run `./client` and `./server` respectively (root permissions will most likely be required)
+2. execute `cargo build --release`
+3. you will find the `client` and `server` binaries in the `target/release` directory
+4) run `./client` and `./server` respectively (root permissions will most likely be required)
