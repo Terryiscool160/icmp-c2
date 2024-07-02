@@ -1,4 +1,4 @@
-# backrust
+# icmp-c2
 
 [![build status](https://github.com/Terryiscool160/icmp-c2/actions/workflows/rust.yml/badge.svg?branch=main)](https://github.com/Terryiscool160/icmp-c2/actions/workflows/rust.yml)
 [![dependency status](https://deps.rs/repo/github/terryiscool160/icmp-c2/status.svg)](https://deps.rs/repo/github/terryiscool160/icmp-c2)
