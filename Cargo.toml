@@ -7,6 +7,10 @@ edition = "2021"
 clap = { version = "4.5.8", features = ["derive"] }
 icmp-socket = "0.2.0"
 
+[lib]
+name = "functions"
+path = "src/functions/mod.rs"
+
 [[bin]]
 name = "server"
 path = "src/server/main.rs"

