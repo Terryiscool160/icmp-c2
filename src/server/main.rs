@@ -5,6 +5,11 @@ use std::{
     io::stdin
 };
 
+// TODO
+// xor packets
+// increment sequence
+// replicate second delay between each ping for more consistant behavior
+
 use icmp_socket::socket::IcmpSocket;
 use icmp_socket::Icmpv4Message;
 use icmp_socket::Icmpv4Packet;
